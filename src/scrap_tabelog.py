@@ -1,11 +1,23 @@
+from dataclasses import dataclass
 import requests
 from bs4 import BeautifulSoup
 import re
-import pandas as pd
 import time
+import datetime
+import json
 
 
 # 参考: https://qiita.com/toshiyuki_tsutsui/items/f143946944a428ed105b
+# 緯度経度取得: https://qiita.com/Kosuke0306Ikko/items/765589c329175364831b
+
+@ dataclass
+class Restaurant:
+    store_id: str
+    name: str
+    latitude: str
+    longitude: str
+    review: list[str]
+
 
 class Tabelog:
     """
@@ -13,40 +25,43 @@ class Tabelog:
     test_mode=Trueで動作させると、最初のページの３店舗のデータのみを取得できる
     """
 
-    def __init__(self, base_url: str, test_mode: bool = True, p_ward: str = '渋谷駅', begin_page: int = 1, end_page: int = 10) -> None:
+    def __init__(self, base_url: str, p_ward: str = '渋谷駅', review_num: int = 10) -> None:
 
         # 変数宣言
-        self.store_id = ''
+        self.base_url = base_url
         self.store_id_num = 0
-        self.store_name = ''
-        self.score = 0
         self.ward = p_ward
-        self.review_cnt = 0
-        self.review = ''
+        self.review_num = review_num
         self.columns = ['store_id', 'store_name',
                         'score', 'ward', 'review_cnt', 'review']
-        self.df = pd.DataFrame(columns=self.columns)
+        self.timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+        self.save_json_filename = f"../data/ramen_{self.ward}_{self.timestamp}.json"
         self.__regexcomp = re.compile(r'\n|\s')  # \nは改行、\sは空白
+        with open(self.save_json_filename, 'w') as f:
+            json.dump([], f, ensure_ascii=False, indent=4)
+
+
+    def do_scrape(self, begin_page: int = 1, end_page: int = 10, test_mode: bool = True, ) -> None:
 
         page_num = begin_page  # 店舗一覧ページ番号
 
         if test_mode:
             # 食べログの点数ランキングでソートする際に必要な処理
-            list_url = f"{base_url}{str(page_num)}?vs=1&sa={self.ward}Srt=D&SrtT=rt&sort_mode=1"
+            list_url = f"{self.base_url}{str(page_num)}?vs=1&sa={self.ward}Srt=D&SrtT=rt&sort_mode=1"
             self.scrape_list(list_url, mode=test_mode)
         else:
             while True:
                 # 食べログの点数ランキングでソートする際に必要な処理
-                list_url = f"{base_url}{str(page_num)}?vs=1&sa={self.ward}Srt=D&SrtT=rt&sort_mode=1"
-                if self.scrape_list(list_url, mode=test_mode) != True:
+                list_url = f"{self.base_url}{str(page_num)}?vs=1&sa={self.ward}Srt=D&SrtT=rt&sort_mode=1"
+                print(f"--------------finish_scripe page {page_num}---------------------")
+                if not self.scrape_list(list_url, mode=test_mode):
                     break
                 # INパラメータまでのページ数データを取得する
                 if page_num >= end_page:
                     break
                 page_num += 1
-        return
 
-    def scrape_list(self, list_url, mode):
+    def scrape_list(self, list_url: str, mode: bool) -> bool:
         """
         店舗一覧ページのパーシング
         """
@@ -61,20 +76,24 @@ class Tabelog:
         if len(soup_a_list) == 0:
             return False
 
+        restaurant_list = []
         if mode:
             for soup_a in soup_a_list[:2]:
                 item_url = soup_a.get('href')  # 店の個別ページURLを取得
                 self.store_id_num += 1
-                self.scrape_item(item_url, mode)
+                restaurant = self.scrape_item(item_url)
+                restaurant_list.append(restaurant)
         else:
             for soup_a in soup_a_list:
                 item_url = soup_a.get('href')  # 店の個別ページURLを取得
                 self.store_id_num += 1
-                self.scrape_item(item_url, mode)
+                restaurant = self.scrape_item(item_url)
+                restaurant_list.append(restaurant)
+        self.dump_json(restaurant_list)
 
         return True
 
-    def scrape_item(self, item_url, mode):
+    def scrape_item(self, item_url: str) -> Restaurant:
         """
         個別店舗情報ページのパーシング
         """
@@ -95,8 +114,8 @@ class Tabelog:
         # </h2>
         store_name_tag = soup.find('h2', class_='display-name')
         store_name = store_name_tag.span.string
-        print('{}→店名：{}'.format(self.store_id_num, store_name.strip()), end='')
-        self.store_name = store_name.strip()
+        store_name = store_name.strip()
+        print('{}→店名：{}'.format(self.store_id_num, store_name), end='')
 
         # ラーメン屋、つけ麺屋以外の店舗は除外
         store_head = soup.find(
@@ -116,8 +135,6 @@ class Tabelog:
         # </b>
         rating_score_tag = soup.find('b', class_='c-rating__val')
         rating_score = rating_score_tag.span.string
-        print('  評価点数：{}点'.format(rating_score), end='')
-        self.score = rating_score
 
         # 評価点数が存在しない店舗は除外
         if rating_score == '-':
@@ -138,8 +155,6 @@ class Tabelog:
         # レビュー件数取得
         print('  レビュー件数：{}'.format(review_tag_id.find(
             'span', class_='rstdtl-navi__total-count').em.string), end='')
-        self.review_cnt = review_tag_id.find(
-            'span', class_='rstdtl-navi__total-count').em.string
 
         # レビュー一覧ページ番号
         page_num = 1  # 1ページ*20 = 20レビュー 。この数字を変えて取得するレビュー数を調整。
@@ -147,30 +162,45 @@ class Tabelog:
         # レビュー一覧ページから個別レビューページを読み込み、パーシング
         # 店舗の全レビューを取得すると、食べログの評価ごとにデータ件数の濃淡が発生してしまうため、
         # 取得するレビュー数は１ページ分としている（件数としては１ページ*20=２0レビュー）
-        while True:
+        review = []
+        while len(review) < self.review_num:
             review_url = review_tag + \
                 'COND-0/smp1/?lc=0&rvw_part=all&PG=' + str(page_num)
             # print('\t口コミ一覧リンク：{}'.format(review_url))
             print(' . ', end='')  # LOG
-            if self.scrape_review(review_url) != True:
-                break
-            if page_num >= 1:
+            review_list = self.scrape_review(review_url)
+            len_review_list = len(review_list)
+            if len_review_list == 0:
                 break
             page_num += 1
+            review += review_list[:min(len_review_list,
+                                       self.review_num - len_review_list)]
+
+        ll = soup.find("script", {"type": "application/ld+json"}).string
+
+        lat_st = ll.find("latitude")+10
+        lat_ed = ll.find(",", lat_st)
+        latitude = ll[lat_st:lat_ed]  # 店舗緯度取得
+
+        lon_st = ll.find("longitude")+11
+        lon_ed = ll.find("}", lon_st)
+        longitude = ll[lon_st:lon_ed]  # 店舗経度取得
 
         process_time = time.time() - start
         print('  取得時間：{}'.format(process_time))
+        restaurant = Restaurant(store_id=self.store_id_num, name=store_name,
+                                latitude=latitude, longitude=longitude, review=review)
 
-        return
+        return restaurant
 
-    def scrape_review(self, review_url):
+    def scrape_review(self, review_url: str) -> list[str]:
         """
         レビュー一覧ページのパーシング
         """
         r = requests.get(review_url)
         if r.status_code != requests.codes.ok:
             print(f'error:not found{ review_url }')
-            return False
+            return []
 
         # 各個人の口コミページ詳細へのリンクを取得する
         # <div class="rvw-item js-rvw-item-clickable-area" data-detail-url="/tokyo/A1304/A130401/13141542/dtlrvwlst/B408082636/?use_type=0&amp;smp=1">
@@ -180,19 +210,22 @@ class Tabelog:
             'div', class_='rvw-item')  # 口コミ詳細ページURL一覧
 
         if len(review_url_list) == 0:
-            return False
-
+            return []
+        review_list = []
         for url in review_url_list:
             review_detail_url = 'https://tabelog.com' + \
                 url.get('data-detail-url')
             #print('\t口コミURL：', review_detail_url)
 
             # 口コミのテキストを取得
-            self.get_review_text(review_detail_url)
+            review = self.get_review_text(review_detail_url)
+            if not review:
+                break
+            review_list.append(review)
 
-        return True
+        return review_list
 
-    def get_review_text(self, review_detail_url):
+    def get_review_text(self, review_detail_url: str) -> str:
         """
         口コミ詳細ページをパーシング
         """
@@ -214,17 +247,13 @@ class Tabelog:
             review = ''
         else:
             review = review[0].p.text.strip()  # strip()は改行コードを除外する関数
+        return review
 
-        #print('\t\t口コミテキスト：', review)
-        self.review = review
-
-        # データフレームの生成
-        self.make_df()
-        return
-
-    def make_df(self):
-        self.store_id = str(self.store_id_num).zfill(8)  # 0パディング
-        se = pd.Series([self.store_id, self.store_name, self.score,
-                       self.ward, self.review_cnt, self.review], self.columns)  # 行を作成
-        self.df = self.df._append(se, self.columns)  # データフレームに行を追加
-        return
+    def dump_json(self, restaurant_list: list[Restaurant]):
+        restaurant_dict_list = [vars(restaurant)
+                                for restaurant in restaurant_list]
+        with open(self.save_json_filename, 'r') as f:
+            all_restaurant_dict_list = json.load(f)
+        all_restaurant_dict_list += restaurant_dict_list
+        with open(self.save_json_filename, 'w') as f:
+            json.dump(restaurant_dict_list, f, ensure_ascii=False, indent=4)

@@ -1,11 +1,11 @@
 from scrap_tabelog import Tabelog
 
+BASE_URL = "https://tabelog.com/tokyo/rstLst/ramen/"
 
 def main():
-    tokyo_ramen_review = Tabelog(
-        base_url="https://tabelog.com/tokyo/rstLst/ramen/", test_mode=False, p_ward='東京都内')
-    # CSV保存
-    tokyo_ramen_review.df.to_csv("../data/tokyo_ramen_review.csv")
+    tabelog = Tabelog(
+        base_url=BASE_URL, p_ward='文京区')
+    tabelog.do_scrape(test_mode=True)
 
 
 if __name__ == "__main__":
