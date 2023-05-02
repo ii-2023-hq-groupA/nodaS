@@ -45,8 +45,8 @@ class Tabelog:
         if test_mode:
             # 食べログの点数ランキングでソートする際に必要な処理
             list_url = f"{self.base_url}{str(page_num)}/?Srt=D&SrtT=rt&sort_mode=1"
-
             restaurant_list = self.scrape_list(list_url, mode=test_mode)
+            self.dump_json(restaurant_list, page_num)
         else:
             while True:
                 # 食べログの点数ランキングでソートする際に必要な処理
@@ -90,7 +90,6 @@ class Tabelog:
                 self.store_id_num += 1
                 restaurant = self.scrape_item(item_url)
                 restaurant_list.append(restaurant)
-
         return restaurant_list
 
     def scrape_item(self, item_url: str) -> Restaurant:
