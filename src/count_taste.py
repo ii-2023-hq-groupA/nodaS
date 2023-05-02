@@ -42,7 +42,7 @@ def read_data(output_csv_filename: str) -> None:
             if i == 0:
                 writer.writeheader()
             writer.writerows(count_data)
-        print(f"write_data: {json_filename}")
+        print(f"write data: {json_filename}")
 
 
 def main():
