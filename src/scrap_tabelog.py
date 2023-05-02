@@ -25,44 +25,44 @@ class Tabelog:
     test_mode=Trueで動作させると、最初のページの３店舗のデータのみを取得できる
     """
 
-    def __init__(self, base_url: str, p_ward: str = '渋谷駅', review_num: int = 10) -> None:
+    def __init__(self, base_url: str, review_num: int = 10, begin_page: int = 1, end_page: int = 10) -> None:
 
         # 変数宣言
         self.base_url = base_url
         self.store_id_num = 0
-        self.ward = p_ward
         self.review_num = review_num
         self.columns = ['store_id', 'store_name',
                         'score', 'ward', 'review_cnt', 'review']
         self.timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-        # self.save_json_filename = f"../data/ramen_{self.ward}_{self.timestamp}.json"
-        self.save_json_filename = f"../data/ramen_{self.ward}.json"
+        self.begin_page = begin_page
+        self.end_page = end_page
         self.__regexcomp = re.compile(r'\n|\s')  # \nは改行、\sは空白
-        with open(self.save_json_filename, 'w') as f:
-            json.dump([], f, ensure_ascii=False, indent=4)
 
-    def do_scrape(self, begin_page: int = 1, end_page: int = 10, test_mode: bool = True, ) -> None:
+    def do_scrape(self, test_mode: bool = True, ) -> None:
 
-        page_num = begin_page  # 店舗一覧ページ番号
+        page_num = self.begin_page  # 店舗一覧ページ番号
 
         if test_mode:
             # 食べログの点数ランキングでソートする際に必要な処理
-            list_url = f"{self.base_url}{str(page_num)}?vs=1&sa={self.ward}Srt=D&SrtT=rt&sort_mode=1"
-            self.scrape_list(list_url, mode=test_mode)
+            list_url = f"{self.base_url}{str(page_num)}/?Srt=D&SrtT=rt&sort_mode=1"
+
+            restaurant_list = self.scrape_list(list_url, mode=test_mode)
         else:
             while True:
                 # 食べログの点数ランキングでソートする際に必要な処理
-                list_url = f"{self.base_url}{str(page_num)}?vs=1&sa={self.ward}Srt=D&SrtT=rt&sort_mode=1"
+                list_url = f"{self.base_url}{str(page_num)}/?Srt=D&SrtT=rt&sort_mode=1"
                 print(
                     f"--------------finish_scripe page {page_num}---------------------")
-                if not self.scrape_list(list_url, mode=test_mode):
+                restaurant_list = self.scrape_list(list_url, mode=test_mode)
+                if len(restaurant_list) == 0:
                     break
+                self.dump_json(restaurant_list, page_num)
                 # INパラメータまでのページ数データを取得する
-                if page_num >= end_page:
+                if page_num >= self.end_page:
                     break
                 page_num += 1
 
-    def scrape_list(self, list_url: str, mode: bool) -> bool:
+    def scrape_list(self, list_url: str, mode: bool) -> list[Restaurant]:
         """
         店舗一覧ページのパーシング
         """
@@ -92,7 +92,7 @@ class Tabelog:
                 restaurant_list.append(restaurant)
         self.dump_json(restaurant_list)
 
-        return True
+        return restaurant_list
 
     def scrape_item(self, item_url: str) -> Restaurant:
         """
@@ -246,8 +246,9 @@ class Tabelog:
             review = review[0].p.text.strip()  # strip()は改行コードを除外する関数
         return review
 
-    def dump_json(self, restaurant_list: list[Restaurant]):
+    def dump_json(self, restaurant_list: list[Restaurant], page_num: int):
         restaurant_dict_list = []
+        save_json_filename = f"../data/ramen_{page_num}.json"
         for restaurant in restaurant_list:
             try:
                 restaurant_dict = vars(restaurant)
@@ -255,8 +256,5 @@ class Tabelog:
                 print(f"can't to convert ot dict error: {restaurant}")
                 continue
             restaurant_dict_list.append(restaurant_dict)
-        with open(self.save_json_filename, 'r') as f:
-            all_restaurant_dict_list = json.load(f)
-        all_restaurant_dict_list += restaurant_dict_list
-        with open(self.save_json_filename, 'w') as f:
+        with open(save_json_filename, 'w') as f:
             json.dump(restaurant_dict_list, f, ensure_ascii=False, indent=4)
