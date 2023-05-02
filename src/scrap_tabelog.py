@@ -35,7 +35,8 @@ class Tabelog:
         self.columns = ['store_id', 'store_name',
                         'score', 'ward', 'review_cnt', 'review']
         self.timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-        self.save_json_filename = f"../data/ramen_{self.ward}_{self.timestamp}.json"
+        # self.save_json_filename = f"../data/ramen_{self.ward}_{self.timestamp}.json"
+        self.save_json_filename = f"../data/ramen_{self.ward}.json"
         self.__regexcomp = re.compile(r'\n|\s')  # \nは改行、\sは空白
         with open(self.save_json_filename, 'w') as f:
             json.dump([], f, ensure_ascii=False, indent=4)
