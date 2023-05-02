@@ -40,7 +40,6 @@ class Tabelog:
         with open(self.save_json_filename, 'w') as f:
             json.dump([], f, ensure_ascii=False, indent=4)
 
-
     def do_scrape(self, begin_page: int = 1, end_page: int = 10, test_mode: bool = True, ) -> None:
 
         page_num = begin_page  # 店舗一覧ページ番号
@@ -53,7 +52,8 @@ class Tabelog:
             while True:
                 # 食べログの点数ランキングでソートする際に必要な処理
                 list_url = f"{self.base_url}{str(page_num)}?vs=1&sa={self.ward}Srt=D&SrtT=rt&sort_mode=1"
-                print(f"--------------finish_scripe page {page_num}---------------------")
+                print(
+                    f"--------------finish_scripe page {page_num}---------------------")
                 if not self.scrape_list(list_url, mode=test_mode):
                     break
                 # INパラメータまでのページ数データを取得する
@@ -250,8 +250,14 @@ class Tabelog:
         return review
 
     def dump_json(self, restaurant_list: list[Restaurant]):
-        restaurant_dict_list = [vars(restaurant)
-                                for restaurant in restaurant_list]
+        restaurant_dict_list = []
+        for restaurant in restaurant_list:
+            try:
+                restaurant_dict = vars(restaurant)
+            except TypeError:
+                print(f"can't to convert ot dict error: {restaurant}")
+                continue
+            restaurant_dict_list.append(restaurant_dict)
         with open(self.save_json_filename, 'r') as f:
             all_restaurant_dict_list = json.load(f)
         all_restaurant_dict_list += restaurant_dict_list
