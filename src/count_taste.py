@@ -2,7 +2,7 @@ import json
 import glob
 import csv
 from typing import Any
-from .scrap_tabelog import Restaurant
+from scrap_tabelog import Restaurant
 
 TASTE = ["醤油", "豚骨", "味噌", "塩", "つけ麺", "家系", "二郎系",
          "担々麺", "魚介", "油そば", "まぜそば", "ちゃんぽん", "鶏白湯"]
@@ -36,16 +36,19 @@ def read_data(output_csv_filename: str) -> None:
     json_file_list = glob.glob("../data/*.json")
     for i, json_filename in enumerate(json_file_list):
         count_data = read_json_data(json_filename)
-        with open(f"../analysis_data/{output_csv_filename}") as f:
-            writer = csv.DictWriter(f)
+        with open(f"../analysis_data/{output_csv_filename}", "a") as f:
+            filed_name = list(count_data[0].keys())
+            writer = csv.DictWriter(f, fieldnames=filed_name)
             if i == 0:
-                writer.writeheader(list(count_data[0].keys()))
+                writer.writeheader()
             writer.writerows(count_data)
+        print(f"write_data: {json_filename}")
 
 
 def main():
     csv_filename = "ramen_count_taste.csv"
     read_data(csv_filename)
+
 
 if __name__ == "__main__":
     main()
