@@ -152,10 +152,6 @@ class Tabelog:
         review_tag_id = soup.find('li', id="rdnavi-review")
         review_tag = review_tag_id.a.get('href')
 
-        # レビュー件数取得
-        print('  レビュー件数：{}'.format(review_tag_id.find(
-            'span', class_='rstdtl-navi__total-count').em.string), end='')
-
         # レビュー一覧ページ番号
         page_num = 1  # 1ページ*20 = 20レビュー 。この数字を変えて取得するレビュー数を調整。
 
