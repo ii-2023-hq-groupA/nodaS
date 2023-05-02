@@ -90,7 +90,6 @@ class Tabelog:
                 self.store_id_num += 1
                 restaurant = self.scrape_item(item_url)
                 restaurant_list.append(restaurant)
-        self.dump_json(restaurant_list)
 
         return restaurant_list
 
