@@ -8,7 +8,7 @@ def main(args):
     print(f"search : begin: {args.start} -> end: {args.end}")
     tabelog = Tabelog(base_url=BASE_URL,
                       begin_page=args.start, end_page=args.end)
-    tabelog.do_scrape(test_mode=True)
+    tabelog.do_scrape(test_mode=False)
 
 
 if __name__ == "__main__":
