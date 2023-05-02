@@ -246,7 +246,7 @@ class Tabelog:
 
     def dump_json(self, restaurant_list: list[Restaurant], page_num: int):
         restaurant_dict_list = []
-        save_json_filename = f"../data/ramen_{page_num}.json"
+        save_json_filename = f"data/ramen_{page_num}.json"
         for restaurant in restaurant_list:
             try:
                 restaurant_dict = vars(restaurant)
