@@ -1,4 +1,4 @@
-from scrap_tabelog import Tabelog
+from src.scrap_tabelog import Tabelog
 import argparse
 
 BASE_URL = "https://tabelog.com/tokyo/R9/rstLst/ramen/"
