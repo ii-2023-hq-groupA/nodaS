@@ -25,7 +25,7 @@ class Tabelog:
     test_mode=Trueで動作させると、最初のページの３店舗のデータのみを取得できる
     """
 
-    def __init__(self, base: str, rating: int = 3.0, review_num: int = 10, begin_page: int = 1, end_page: int = 10) -> None:
+    def __init__(self, base: str, rating: float = 3.0, review_num: int = 10, begin_page: int = 1, end_page: int = 10) -> None:
 
         # 変数宣言
         self.base = base
