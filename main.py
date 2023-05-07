@@ -15,7 +15,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-r', '--rating', type=int, required=False)
+    parser.add_argument('-r', '--rating', type=int, required=True)
     parser.add_argument('-s', '--start', type=int, required=True)
     parser.add_argument('-e', '--end', type=int, required=True)
     args = parser.parse_args()
