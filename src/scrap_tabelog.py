@@ -125,7 +125,7 @@ class Tabelog:
         store_head_list = store_head_list[1].find_all('span')
         #print('ターゲット：', store_head_list[0].text)
 
-        if store_head_list[0].text not in {'ラーメン', 'つけ麺', '油そば・まぜそば'}:
+        if store_head_list[0].text not in {'ラーメン', 'つけ麺', '油そば・まぜそば', '担々麺', 'ちゃんぽん'}:
             print('ラーメンorつけ麺のお店ではないので処理対象外')
             self.store_id_num -= 1
             return
