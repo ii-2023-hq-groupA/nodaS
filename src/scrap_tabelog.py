@@ -52,7 +52,7 @@ class Tabelog:
                 # 食べログの点数ランキングでソートする際に必要な処理
                 list_url = f"{self.base_url}{str(page_num)}/?Srt=D&SrtT=rt&sort_mode=1"
                 print(
-                    f"--------------finish_scripe page {page_num}---------------------")
+                    f"--------------start_scripe page {page_num}---------------------")
                 restaurant_list = self.scrape_list(list_url, mode=test_mode)
                 if len(restaurant_list) == 0:
                     break
