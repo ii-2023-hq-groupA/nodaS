@@ -1,6 +1,22 @@
+from typing import Any
 import folium
 import argparse
 import pandas as pd
+from count_taste import TASTE
+
+TASTE_COUNT = { TASTE[i] :i for i in range(len(TASTE))}
+
+COLORS = ["red", "blue", "green", "purple", "orange", "darkred", "lightred", "beige", 
+         "darkblue", "darkgreen", "cadetblue", "darkpurple", "white", "pink", 
+         "lightblue", "lightgreen", "gray", "black", "lightgray"]
+
+def get_taste_color(data: Any):
+    taste_count = [[data[taste], taste] for taste in TASTE]
+    taste_count.sort(reverse=True)
+    taste = taste_count[0][1]
+    color = COLORS[TASTE_COUNT[taste]]
+    return taste, color
+
 
 
 def main(args):
@@ -9,13 +25,15 @@ def main(args):
     df = pd.read_csv(args.file)
     for _, data in df.iterrows():
         location = [data["latitude"], data["longitude"]]
+        shop_name = data["name"]
+        taste, color = get_taste_color(data)
         folium.Marker(
             location=location,
-            popup=data["name"],
-            icon=folium.Icon(color='red', icon='home')
+            popup=f"{shop_name}\n taste: {taste}",
+            icon=folium.Icon(color=color, icon='glyphicon')
         ).add_to(folium_map)
     folium_map.save('../map/map.html')
-    
+
 
 
 
