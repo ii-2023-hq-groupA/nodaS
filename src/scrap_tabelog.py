@@ -25,11 +25,13 @@ class Tabelog:
     test_mode=Trueで動作させると、最初のページの３店舗のデータのみを取得できる
     """
 
-    def __init__(self, base_url: str, review_num: int = 10, begin_page: int = 1, end_page: int = 10) -> None:
+    def __init__(self, base: str, rating: float = 3.0, review_num: int = 10, begin_page: int = 1, end_page: int = 10) -> None:
 
         # 変数宣言
-        self.base_url = base_url
+        self.base = base
+        self.url = "https://tabelog.com/tokyo/" + base + "/rstLst/ramen/"
         self.store_id_num = 0
+        self.rating = rating
         self.review_num = review_num
         self.columns = ['store_id', 'store_name',
                         'score', 'ward', 'review_cnt', 'review']
@@ -44,15 +46,15 @@ class Tabelog:
 
         if test_mode:
             # 食べログの点数ランキングでソートする際に必要な処理
-            list_url = f"{self.base_url}{str(page_num)}/?Srt=D&SrtT=rt&sort_mode=1"
+            list_url = f"{self.url}{str(page_num)}/?Srt=D&SrtT=rt&sort_mode=1"
             restaurant_list = self.scrape_list(list_url, mode=test_mode)
             self.dump_json(restaurant_list, page_num)
         else:
             while True:
                 # 食べログの点数ランキングでソートする際に必要な処理
-                list_url = f"{self.base_url}{str(page_num)}/?Srt=D&SrtT=rt&sort_mode=1"
+                list_url = f"{self.url}{str(page_num)}/?Srt=D&SrtT=rt&sort_mode=1"
                 print(
-                    f"--------------finish_scripe page {page_num}---------------------")
+                    f"--------------start_scripe page {page_num}---------------------")
                 restaurant_list = self.scrape_list(list_url, mode=test_mode)
                 if len(restaurant_list) == 0:
                     break
@@ -123,7 +125,7 @@ class Tabelog:
         store_head_list = store_head_list[1].find_all('span')
         #print('ターゲット：', store_head_list[0].text)
 
-        if store_head_list[0].text not in {'ラーメン', 'つけ麺'}:
+        if store_head_list[0].text not in {'ラーメン', 'つけ麺', '油そば・まぜそば', '担々麺', 'ちゃんぽん'}:
             print('ラーメンorつけ麺のお店ではないので処理対象外')
             self.store_id_num -= 1
             return
@@ -141,8 +143,8 @@ class Tabelog:
             self.store_id_num -= 1
             return
        # 評価が3.5未満店舗は除外
-        if float(rating_score) < 3.5:
-            print('  食べログ評価が3.5未満のため処理対象外')
+        if float(rating_score) < self.rating:
+            print('  食べログ評価がrating未満のため処理対象外')
             self.store_id_num -= 1
             return
 
@@ -246,7 +248,7 @@ class Tabelog:
 
     def dump_json(self, restaurant_list: list[Restaurant], page_num: int):
         restaurant_dict_list = []
-        save_json_filename = f"data/ramen_{page_num}.json"
+        save_json_filename = f"data/ramen_{self.base}_{page_num}.json"
         for restaurant in restaurant_list:
             try:
                 restaurant_dict = vars(restaurant)
