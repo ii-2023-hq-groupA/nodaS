@@ -36,7 +36,7 @@ def read_data(output_csv_filename: str) -> None:
     json_file_list = glob.glob("../data/*.json")
     for i, json_filename in enumerate(json_file_list):
         count_data = read_json_data(json_filename)
-        with open(f"../analysis_data/{output_csv_filename}", "a") as f:
+        with open(f"../analysis_data/{output_csv_filename}", "a", encoding="utf_8_sig") as f:
             filed_name = list(count_data[0].keys())
             writer = csv.DictWriter(f, fieldnames=filed_name)
             if i == 0:
