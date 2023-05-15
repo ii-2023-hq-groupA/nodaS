@@ -4,7 +4,7 @@
 
 ### 実行方法
 
-`python main.py -s <startページ数> -e <endページ数>`
+`python main.py -s <startページ数> -e <endページ数> -r 3.1`
 
 ### データ
 
