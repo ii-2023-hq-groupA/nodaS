@@ -16,7 +16,7 @@
 
 ### 実行方法
 
-`pyhton src/count_taste.py`
+`python src/count_taste.py`
 
 - data ディレクトリ内に全ての json データを格納しておく.
 
