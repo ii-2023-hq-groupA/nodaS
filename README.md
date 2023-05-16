@@ -4,7 +4,7 @@
 
 ### 実行方法
 
-`python main.py -s <startページ数> -e <endページ数>`
+`python main.py -s <startページ数> -e <endページ数> -r 3.1`
 
 ### データ
 
@@ -16,7 +16,7 @@
 
 ### 実行方法
 
-`pyhton src/count_taste.py`
+`python src/count_taste.py`
 
 - data ディレクトリ内に全ての json データを格納しておく.
 

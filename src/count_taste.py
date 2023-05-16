@@ -33,7 +33,7 @@ def read_json_data(json_filename: str) -> list[dict[str, Any]]:
 
 
 def read_data(output_csv_filename: str) -> None:
-    json_file_list = glob.glob("../data/*.json")
+    json_file_list = glob.glob("data/*.json")
     for i, json_filename in enumerate(json_file_list):
         count_data = read_json_data(json_filename)
         with open(f"../analysis_data/{output_csv_filename}", "a", encoding="utf_8_sig") as f:
