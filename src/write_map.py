@@ -25,7 +25,6 @@ def main(args):
     df = pd.read_csv(args.file)
     for _, data in df.iterrows():
         location = [data["latitude"], data["longitude"]]
-        print(location)
         shop_name = data["name"]
         taste = get_taste(data)
         folium.CircleMarker(
