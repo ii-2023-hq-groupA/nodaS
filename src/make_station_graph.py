@@ -72,7 +72,7 @@ STATION_EN = {
     "秋葉原": "Akihabara",
     "神田": "Kanda",
 }
-R = 2  # km
+R = 1  # km
 
 
 def judge_neighbor(station: str, location: list[int]) -> bool:
