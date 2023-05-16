@@ -6,9 +6,9 @@ from count_taste import TASTE
 
 TASTE_COUNT = {TASTE[i]: i for i in range(len(TASTE))}
 # folium用
-COLORS = ["red", "blue", "green", "purple", "orange", "darkred", "lightred", "beige",
-          "darkblue", "darkgreen", "cadetblue", "darkpurple", "white", "pink",
-          "lightblue", "lightgreen", "gray", "black", "lightgray"]
+COLORS = ["red", "blue", "green", "purple", "orange", "darkred", "pink", "beige",
+          "lightblue", "lightgreen", "cadetblue", "darkpurple", "lightgray", "lightred",
+          "darkblue", "darkgreen", "gray", "black", "white"]
 
 
 def get_taste(data: Any) -> str:

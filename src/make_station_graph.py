@@ -8,11 +8,25 @@ from googletrans import Translator
 
 TASTE_COUNT = {TASTE[i]: i for i in range(len(TASTE))}
 # matplotlib用 color
-COLORS = ["red", "blue", "green", "purple", "orange", "darkred", "lightcoral", "beige",
-          "darkblue", "darkgreen", "cadetblue", "darkviolet", "white", "pink",
-          "lightblue", "lightgreen", "gray", "black", "lightgray"]
+COLORS = ["red", "blue", "green", "purple", "orange", "darkred", "pink", "beige",
+          "lightblue", "lightgreen", "cadetblue", "darkviolet", "lightgray", "lightcoral",
+          "darkblue", "darkgreen", "gray", "black", "white"]
 translator = Translator()
-TASTES_EN = {taste: translator.translate(taste).text for taste in TASTE}
+TASTES_EN = {
+    "醤油": "soy sauce",
+    "豚骨": "pig bones",
+    "味噌": "miso",
+    "塩": "salt",
+    "つけ麺": "tsukemen",
+    "家系": "Family line",
+    "二郎系": "Erlang",
+    "担々麺": "Dandan noodles",
+    "魚介": "seafood",
+    "油そば": "Oil soba",
+    "まぜそば": "Maze soba",
+    "ちゃんぽん": "Champon",
+    "鶏白湯": "Chicken hot water",
+}
 # [latitude, longitude]
 STATION = {
     "東京": [35.681382,	139.76608399999998],
@@ -55,13 +69,12 @@ def judge_neighbor(station: str, location: list[int]) -> bool:
     return False
 
 
-def main(args):
-    print(f"read file: {args.file}")
-    df = pd.read_csv(args.file)
+def make_graph(station: str, filepath: str):
+    df = pd.read_csv(filepath)
     taste_count = {TASTE[i]: 0 for i in range(len(TASTE))}
     for _, data in df.iterrows():
         location = [data["latitude"], data["longitude"]]
-        if not judge_neighbor(args.station, location):
+        if not judge_neighbor(station, location):
             continue
         taste = get_taste(data)
         taste_count[taste] += 1
@@ -69,20 +82,27 @@ def main(args):
     ax = fig.add_subplot(1, 1, 1)
     x = [TASTES_EN[taste] for taste in taste_count.keys()]
     y = list(taste_count.values())
-    rect = ax.barh(x, y)
-    for i in range(len(x)):
-        rect[i].set_color(COLORS[i])
-    ax.set_xlabel("shop count")
-    ax.set_ylabel("taste")
-    ax.invert_yaxis()
-    ax.set_title(f"{translator.translate(args.station).text} Sta.")
+    print(y)
+    # rect = ax.barh(x, y)
+    try:
+        ax.pie(y, labels=x, colors=COLORS[:len(y)])
+    except ValueError:
+        print(f"can't write {station} station graph")
+        return
+    ax.set_title(f"{translator.translate(station).text} Sta.")
     fig.tight_layout()
-    fig.savefig(f"analysis_data/graph_{args.station}.pdf")
+    fig.savefig(f"analysis_data/graph_{station}.pdf")
+
+
+def main(args):
+    print(f"read file: {args.file}")
+    for sta in STATION.keys():
+        print(f"station: {sta}")
+        make_graph(sta, args.file)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--file', type=str, required=True)
-    parser.add_argument('-s', '--station', type=str, required=True)
     args = parser.parse_args()
     main(args)
