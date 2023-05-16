@@ -3,30 +3,11 @@ from geopy.distance import geodesic
 import argparse
 import pandas as pd
 from count_taste import TASTE
+from make_ratio_graph import TASTES_EN, COLORS
 from write_map import get_taste
-from googletrans import Translator
 
 TASTE_COUNT = {TASTE[i]: i for i in range(len(TASTE))}
-# matplotlib用 color
-COLORS = ["red", "blue", "green", "purple", "orange", "darkred", "pink", "beige",
-          "lightblue", "lightgreen", "cadetblue", "darkviolet", "lightgray", "lightcoral",
-          "darkblue", "darkgreen", "gray", "black", "white"]
-translator = Translator()
-TASTES_EN = {
-    "醤油": "soy sauce",
-    "豚骨": "pig bones",
-    "味噌": "miso",
-    "塩": "salt",
-    "つけ麺": "tsukemen",
-    "家系": "Family line",
-    "二郎系": "Erlang",
-    "担々麺": "Dandan noodles",
-    "魚介": "seafood",
-    "油そば": "Oil soba",
-    "まぜそば": "Maze soba",
-    "ちゃんぽん": "Champon",
-    "鶏白湯": "Chicken hot water",
-}
+
 # [latitude, longitude]
 STATION = {
     "東京": [35.681382,	139.76608399999998],
@@ -59,7 +40,39 @@ STATION = {
     "秋葉原": [35.698683, 139.77421900000002],
     "神田": [35.69169, 139.77088300000003],
 }
-R = 5  # km
+
+STATION_EN = {
+    "東京": "Tokyo",
+    "有楽町": "Yurakucho",
+    "新橋": "Shinbashi",
+    "浜松町": "Hamamatsucho",
+    "田町": "Townscho",
+    "品川": "Shinagawa",
+    "大崎": "Osaki",
+    "五反田": "Gotanda",
+    "目黒": "Meguro",
+    "恵比寿": "Ebisu",
+    "渋谷": "Shibuya",
+    "原宿": "Roming",
+    "代々木": "Yoyogi",
+    "新宿": "Shinjuku",
+    "新大久保": "Shinokubo",
+    "高田馬場": "Takadanobaba",
+    "目白": "White",
+    "池袋": "Ikebukuro",
+    "大塚": "Otsuka",
+    "巣鴨": "Sediation",
+    "駒込": "Komagome",
+    "田端": "Tabata",
+    "西日暮里": "Nishi-Nippori",
+    "日暮里": "Nipipato",
+    "鶯谷": "Ugly",
+    "上野": "Ueno",
+    "御徒町": "Okachimachi",
+    "秋葉原": "Akihabara",
+    "神田": "Kanda",
+}
+R = 2  # km
 
 
 def judge_neighbor(station: str, location: list[int]) -> bool:
@@ -89,7 +102,7 @@ def make_graph(station: str, filepath: str):
     except ValueError:
         print(f"can't write {station} station graph")
         return
-    ax.set_title(f"{translator.translate(station).text} Sta.")
+    ax.set_title(f"{STATION_EN[station]} Sta.")
     fig.tight_layout()
     fig.savefig(f"analysis_data/graph_{station}.pdf")
 

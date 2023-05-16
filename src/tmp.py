@@ -5,10 +5,11 @@ import pandas as pd
 from count_taste import TASTE
 from write_map import get_taste
 from googletrans import Translator
+from make_station_graph import STATION
 
 translator = Translator()
-TASTES_EN = {taste: translator.translate(taste).text for taste in TASTE}
+STATION_EN = {station: translator.translate(station).text for station in STATION.keys()}
 print("{")
-for taste, en in TASTES_EN.items():
-    print(f"\"{taste}\": \"{en}\",")
+for station, en in STATION_EN.items():
+    print(f"\"{station}\": \"{en}\",")
 print("}")
