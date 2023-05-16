@@ -25,8 +25,9 @@ def main(args):
     df = pd.read_csv(args.file)
     for _, data in df.iterrows():
         location = [data["latitude"], data["longitude"]]
+        print(location)
         shop_name = data["name"]
-        taste = get_taste_color(data)
+        taste = get_taste(data)
         folium.CircleMarker(
             location=location,
             radius=5,
@@ -34,7 +35,7 @@ def main(args):
             color=COLORS[TASTE_COUNT[taste]],
             fill_color=COLORS[TASTE_COUNT[taste]],
         ).add_to(folium_map)
-    folium_map.save('../map/map.html')
+    folium_map.save('map/map.html')
 
 
 if __name__ == "__main__":
