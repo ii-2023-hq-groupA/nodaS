@@ -3,16 +3,11 @@ from geopy.distance import geodesic
 import argparse
 import pandas as pd
 from count_taste import TASTE
+from make_ratio_graph import TASTES_EN, COLORS
 from write_map import get_taste
-from googletrans import Translator
 
 TASTE_COUNT = {TASTE[i]: i for i in range(len(TASTE))}
-# matplotlib用 color
-COLORS = ["red", "blue", "green", "purple", "orange", "darkred", "lightcoral", "beige",
-          "darkblue", "darkgreen", "cadetblue", "darkviolet", "white", "pink",
-          "lightblue", "lightgreen", "gray", "black", "lightgray"]
-translator = Translator()
-TASTES_EN = {taste: translator.translate(taste).text for taste in TASTE}
+
 # [latitude, longitude]
 STATION = {
     "東京": [35.681382,	139.76608399999998],
@@ -45,7 +40,39 @@ STATION = {
     "秋葉原": [35.698683, 139.77421900000002],
     "神田": [35.69169, 139.77088300000003],
 }
-R = 5  # km
+
+STATION_EN = {
+    "東京": "Tokyo",
+    "有楽町": "Yurakucho",
+    "新橋": "Shinbashi",
+    "浜松町": "Hamamatsucho",
+    "田町": "Townscho",
+    "品川": "Shinagawa",
+    "大崎": "Osaki",
+    "五反田": "Gotanda",
+    "目黒": "Meguro",
+    "恵比寿": "Ebisu",
+    "渋谷": "Shibuya",
+    "原宿": "Roming",
+    "代々木": "Yoyogi",
+    "新宿": "Shinjuku",
+    "新大久保": "Shinokubo",
+    "高田馬場": "Takadanobaba",
+    "目白": "White",
+    "池袋": "Ikebukuro",
+    "大塚": "Otsuka",
+    "巣鴨": "Sediation",
+    "駒込": "Komagome",
+    "田端": "Tabata",
+    "西日暮里": "Nishi-Nippori",
+    "日暮里": "Nipipato",
+    "鶯谷": "Ugly",
+    "上野": "Ueno",
+    "御徒町": "Okachimachi",
+    "秋葉原": "Akihabara",
+    "神田": "Kanda",
+}
+R = 1  # km
 
 
 def judge_neighbor(station: str, location: list[int]) -> bool:
@@ -55,13 +82,12 @@ def judge_neighbor(station: str, location: list[int]) -> bool:
     return False
 
 
-def main(args):
-    print(f"read file: {args.file}")
-    df = pd.read_csv(args.file)
+def make_graph(station: str, filepath: str):
+    df = pd.read_csv(filepath)
     taste_count = {TASTE[i]: 0 for i in range(len(TASTE))}
     for _, data in df.iterrows():
         location = [data["latitude"], data["longitude"]]
-        if not judge_neighbor(args.station, location):
+        if not judge_neighbor(station, location):
             continue
         taste = get_taste(data)
         taste_count[taste] += 1
@@ -69,20 +95,27 @@ def main(args):
     ax = fig.add_subplot(1, 1, 1)
     x = [TASTES_EN[taste] for taste in taste_count.keys()]
     y = list(taste_count.values())
-    rect = ax.barh(x, y)
-    for i in range(len(x)):
-        rect[i].set_color(COLORS[i])
-    ax.set_xlabel("shop count")
-    ax.set_ylabel("taste")
-    ax.invert_yaxis()
-    ax.set_title(f"{translator.translate(args.station).text} Sta.")
+    print(y)
+    # rect = ax.barh(x, y)
+    try:
+        ax.pie(y, labels=x, colors=COLORS[:len(y)])
+    except ValueError:
+        print(f"can't write {station} station graph")
+        return
+    ax.set_title(f"{STATION_EN[station]} Sta.")
     fig.tight_layout()
-    fig.savefig(f"analysis_data/graph_{args.station}.pdf")
+    fig.savefig(f"analysis_data/graph_{station}.pdf")
+
+
+def main(args):
+    print(f"read file: {args.file}")
+    for sta in STATION.keys():
+        print(f"station: {sta}")
+        make_graph(sta, args.file)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--file', type=str, required=True)
-    parser.add_argument('-s', '--station', type=str, required=True)
     args = parser.parse_args()
     main(args)

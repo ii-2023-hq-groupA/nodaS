@@ -6,9 +6,9 @@ from count_taste import TASTE
 
 TASTE_COUNT = {TASTE[i]: i for i in range(len(TASTE))}
 # folium用
-COLORS = ["red", "blue", "green", "purple", "orange", "darkred", "lightred", "beige",
-          "darkblue", "darkgreen", "cadetblue", "darkpurple", "white", "pink",
-          "lightblue", "lightgreen", "gray", "black", "lightgray"]
+COLORS = ["red", "blue", "green", "purple", "orange", "darkred", "pink", "beige",
+          "lightblue", "lightgreen", "cadetblue", "darkpurple", "lightgray", "lightred",
+          "darkblue", "darkgreen", "gray", "black", "white"]
 
 
 def get_taste(data: Any) -> str:
@@ -26,7 +26,7 @@ def main(args):
     for _, data in df.iterrows():
         location = [data["latitude"], data["longitude"]]
         shop_name = data["name"]
-        taste = get_taste_color(data)
+        taste = get_taste(data)
         folium.CircleMarker(
             location=location,
             radius=5,
@@ -34,7 +34,7 @@ def main(args):
             color=COLORS[TASTE_COUNT[taste]],
             fill_color=COLORS[TASTE_COUNT[taste]],
         ).add_to(folium_map)
-    folium_map.save('../map/map.html')
+    folium_map.save('map/map.html')
 
 
 if __name__ == "__main__":
