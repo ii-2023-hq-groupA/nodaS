@@ -21,7 +21,7 @@ def get_taste(data: Any) -> str:
     taste = taste_count[0][1]
     return taste
 
-def find_group(taste):
+def find_group(taste: str) -> FeatureGroup:
     return GROUP[TASTE.index(taste)]
 
 def main(args):
