@@ -4,6 +4,7 @@ import argparse
 import pandas as pd
 from count_taste import TASTE
 from write_layermap import COLORS
+from make_station_graph import STATION
 
 TASTE_COUNT = {TASTE[i]: i for i in range(len(TASTE))}
 # # folium用
@@ -24,6 +25,12 @@ def main(args):
     folium_map = folium.Map(location=[35.690921, 139.700258], zoom_start=15,
                             tiles="cartodbpositron")
     df = pd.read_csv(args.file)
+    for station, location in STATION.items():
+        folium.Marker(
+            location=location,
+            radius=1000,
+            popup=f"{station}",
+        ).add_to(folium_map)
     for _, data in df.iterrows():
         location = [data["latitude"], data["longitude"]]
         shop_name = data["name"]
@@ -35,7 +42,7 @@ def main(args):
             color=COLORS[TASTE_COUNT[taste]],
             fill_color=COLORS[TASTE_COUNT[taste]],
         ).add_to(folium_map)
-    folium_map.save('map/map.html')
+    folium_map.save('map/map_station.html')
 
 
 if __name__ == "__main__":

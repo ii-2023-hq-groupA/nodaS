@@ -3,8 +3,9 @@ from geopy.distance import geodesic
 import argparse
 import pandas as pd
 from count_taste import TASTE
-from make_ratio_graph import TASTES_EN, COLORS
+from make_ratio_graph import TASTES_EN
 from write_map import get_taste
+from write_layermap import COLORS
 
 TASTE_COUNT = {TASTE[i]: i for i in range(len(TASTE))}
 
@@ -46,27 +47,27 @@ STATION_EN = {
     "有楽町": "Yurakucho",
     "新橋": "Shinbashi",
     "浜松町": "Hamamatsucho",
-    "田町": "Townscho",
+    "田町": "Tamachi",
     "品川": "Shinagawa",
     "大崎": "Osaki",
     "五反田": "Gotanda",
     "目黒": "Meguro",
     "恵比寿": "Ebisu",
     "渋谷": "Shibuya",
-    "原宿": "Roming",
+    "原宿": "Harajuku",
     "代々木": "Yoyogi",
     "新宿": "Shinjuku",
     "新大久保": "Shinokubo",
     "高田馬場": "Takadanobaba",
-    "目白": "White",
+    "目白": "Meziro",
     "池袋": "Ikebukuro",
     "大塚": "Otsuka",
-    "巣鴨": "Sediation",
+    "巣鴨": "Sugamo",
     "駒込": "Komagome",
     "田端": "Tabata",
     "西日暮里": "Nishi-Nippori",
-    "日暮里": "Nipipato",
-    "鶯谷": "Ugly",
+    "日暮里": "Nippori",
+    "鶯谷": "Uguisudani",
     "上野": "Ueno",
     "御徒町": "Okachimachi",
     "秋葉原": "Akihabara",
@@ -98,13 +99,13 @@ def make_graph(station: str, filepath: str):
     print(y)
     # rect = ax.barh(x, y)
     try:
-        ax.pie(y, labels=x, colors=COLORS[:len(y)])
+        ax.pie(y, colors=COLORS[:len(y)])
     except ValueError:
         print(f"can't write {station} station graph")
         return
-    ax.set_title(f"{STATION_EN[station]} Sta.")
+    # ax.set_title(f"{STATION_EN[station]} Sta.")
     fig.tight_layout()
-    fig.savefig(f"analysis_data/graph_{station}.pdf")
+    fig.savefig(f"analysis_data/graph_{station}.png")
 
 
 def main(args):

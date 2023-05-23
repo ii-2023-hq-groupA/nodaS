@@ -4,27 +4,28 @@ import pandas as pd
 from count_taste import TASTE
 from write_map import get_taste
 from googletrans import Translator
+from write_layermap import COLORS
 
 TASTE_COUNT = {TASTE[i]: i for i in range(len(TASTE))}
-# matplotlib用 color
-COLORS = ["red", "blue", "green", "purple", "orange", "darkred", "pink", "beige",
-          "lightblue", "lightgreen", "cadetblue", "darkviolet", "lightgray", "lightcoral",
-          "darkblue", "darkgreen", "gray", "black", "white"]
+# # matplotlib用 color
+# COLORS = ["red", "blue", "green", "purple", "orange", "darkred", "pink", "beige",
+#           "lightblue", "lightgreen", "cadetblue", "darkviolet", "lightgray", "lightcoral",
+#           "darkblue", "darkgreen", "gray", "black", "white"]
 translator = Translator()
 TASTES_EN = {
-    "醤油": "soy sauce",
-    "豚骨": "pig bones",
-    "味噌": "miso",
-    "塩": "salt",
-    "つけ麺": "tsukemen",
-    "家系": "Family line",
-    "二郎系": "Erlang",
-    "担々麺": "Dandan noodles",
-    "魚介": "seafood",
+    "醤油": "Soy sauce",
+    "豚骨": "Tonkotsu",
+    "味噌": "Miso",
+    "塩": "Salt",
+    "つけ麺": "Tsukemen",
+    "家系": "Ie-kei",
+    "二郎系": "\n\nJiro-kei",  # 文字被り　　防止
+    "担々麺": "Tantanmen",
+    "魚介": "Seafood",
     "油そば": "Oil soba",
-    "まぜそば": "Maze soba",
-    "ちゃんぽん": "Champon",
-    "鶏白湯": "Chicken hot water",
+    "まぜそば": "Oiled Ramen Noodles",
+    "ちゃんぽん": "Chanpon",
+    "鶏白湯": "Slow-cooked chicken broth",
 }
 
 
@@ -42,7 +43,7 @@ def make_graph(filepath: str):
     print(y)
     ax.pie(y, labels=x, colors=COLORS[:len(y)])
     fig.tight_layout()
-    fig.savefig("analysis_data/graph_all.pdf")
+    fig.savefig("analysis_data/graph_all.png")
 
 
 def main(args):
